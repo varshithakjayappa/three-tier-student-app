@@ -11,14 +11,18 @@ app.use(cors());
 let db;
 
 // 🔁 MySQL Connection with Retry Logic
+const fs = require("fs");
+
+const password = fs.readFileSync(process.env.DB_PASSWORD_FILE, "utf8").trim();
+
 const connectWithRetry = async (retries = 10, delay = 3000) => {
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
       const pool = await mysql.createPool({
-        host: process.env.host,
-        user: process.env.user,
-        password: process.env.password,
-        database: process.env.database,
+        host: process.env.DB_HOST,
+        user: process.env.DB_USER,
+        password,
+        database: process.env.DB_NAME,
         connectionLimit: 10,
         ssl: { rejectUnauthorized: false }
       });
