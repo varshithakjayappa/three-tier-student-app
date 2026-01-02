@@ -1,5 +1,10 @@
 ### AL ###
-#Template for AL projects for Dynamics 365 Business Central
+# node modules
+node_modules
+secrets/
+backend/.env
+frontend/.env
+
 #launch.json folder
 .vscode/
 #Cache folder
@@ -20,5 +25,3 @@ rad.json
 *.flf
 #Test results file
 TestResults.xml
-# node modules
-node_modules
