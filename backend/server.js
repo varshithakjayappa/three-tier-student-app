@@ -13,7 +13,7 @@ let db;
 // 🔁 MySQL Connection with Retry Logic
 const fs = require("fs");
 
-const password = fs.readFileSync(process.env.DB_PASSWORD_FILE, "utf8").trim();
+//const password = fs.readFileSync(process.env.DB_PASSWORD_FILE, "utf8").trim();
 
 const connectWithRetry = async (retries = 10, delay = 3000) => {
   for (let attempt = 1; attempt <= retries; attempt++) {
@@ -21,7 +21,8 @@ const connectWithRetry = async (retries = 10, delay = 3000) => {
       const pool = await mysql.createPool({
         host: process.env.DB_HOST,
         user: process.env.DB_USER,
-        password,
+        password: process.env.MYSQL_ROOT_PASSWORD,
+        //password, 
         database: process.env.DB_NAME,
         connectionLimit: 10,
         ssl: { rejectUnauthorized: false }
@@ -194,6 +195,32 @@ const ensureTables = async (db) => {
         return res.status(500).json({ error: 'Error deleting teacher' });
       }
     });
+    
+       // ---- Healthcheck Endpoints ----
+
+// Readiness probe: checks if DB is connected
+  app.get('/health', async (req, res) => {
+  try {
+    if (!db) throw new Error('DB not initialized');
+
+    // Simple query to ensure DB is alive
+    await db.query('SELECT 1');
+    return res.status(200).send('OK');
+  } catch (err) {
+    console.error('Readiness check failed:', err.message);
+    return res.status(500).send('DB not ready');
+  }
+});
+
+// Startup probe: simple check if server has started
+app.get('/started', (req, res) => {
+  if (db) {
+    return res.status(200).send('Started');
+  } else {
+    return res.status(503).send('Not started yet');
+  }
+});
+  
 
     // ---- Start Server After DB Ready ----
     app.listen(3500, () => {
