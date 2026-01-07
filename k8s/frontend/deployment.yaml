@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment
+  namespace: three-tier
+  labels:
+    app: frontend-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: frontend-app
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 25%
+  template:
+    metadata:
+      labels:
+        app: frontend-app
+    spec:
+      imagePullSecrets:
+      - name: docker-registry-secret
+      containers:
+        - name: frontend-student-app
+          image: varshithakj/student-app-frontend-image:v2.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000
+          env:
+          - name: REACT_APP_API_BASE_URL
+            value: http://backend:3500
+          volumeMounts:
+            - name: nginx-config
+              mountPath: /etc/nginx/conf.d/default.conf
+              subPath: default.conf
+              readOnly: true
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 90
+            timeoutSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 90
+            timeoutSeconds: 10
+      volumes:
+        - name: nginx-config
+          configMap:
+            name: frontend-nginx-config

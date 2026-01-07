@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-nginx-config
+  namespace: three-tier
+  labels:
+    app: frontend-app
+data:
+  default.conf: |
+    # --- contents of nginx.conf ---
+    server {
+    listen 3000;
+    server_name localhost;
+
+    root /usr/share/nginx/html;
+    index index.html;
+
+    location / {
+        # if no file found, fallback to React
+        try_files $uri /index.html;
+    }
+
+    location /api {
+       proxy_pass http://backend:3500/;
+    }
+
+    location /addstudent {
+        proxy_pass http://backend:3500;
+    }
+    
+     location /student {
+        proxy_pass http://backend:3500;
+    }
+    
+     location /addteacher {
+        proxy_pass http://backend:3500;
+    }
+    
+    location /teacher {
+        proxy_pass http://backend:3500;
+    }
+
+    location /health {
+        default_type text/plain;
+        return 200 'ok';
+    }
+    # ensures React handles unknown routes
+    error_page 404 /index.html;
+    }
+
+
