@@ -11,3 +11,4 @@ spec:
   persistentVolumeReclaimPolicy: Delete
   hostPath:
     path: /data/db
+    type: DirectoryOrCreate
