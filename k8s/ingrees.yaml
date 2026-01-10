@@ -3,9 +3,8 @@ kind: Ingress
 metadata:
   name: student-app-ingress
   namespace: three-tier
-  annotations:
-    kubernetes.io/ingress.class: nginx
 spec:
+  ingressClassName: nginx
   rules:
   - host: student-app.local
     http:
