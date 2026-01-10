@@ -1,0 +1,48 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.names.configMap }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "frontend-app.labels" . | nindent 4 }}
+data:
+  default.conf: |
+    server {
+        listen 3000;
+        server_name localhost;
+
+        root /usr/share/nginx/html;
+        index index.html;
+
+        # React routing
+        location / {
+            try_files $uri /index.html;
+        }
+
+        location /api/ {
+            proxy_pass http://{{ (index .Values.backend.paths 0).serviceName }}:{{ (index .Values.backend.paths 0).port }}/;
+        }
+
+        location /addstudent {
+            proxy_pass http://{{ (index .Values.backend.paths 0).serviceName }}:{{ (index .Values.backend.paths 0).port }};
+        }
+
+        location /student {
+            proxy_pass http://{{ (index .Values.backend.paths 0).serviceName }}:{{ (index .Values.backend.paths 0).port }};
+        }
+
+        location /addteacher {
+            proxy_pass http://{{ (index .Values.backend.paths 0).serviceName }}:{{ (index .Values.backend.paths 0).port }};
+        }
+
+        location /teacher {
+            proxy_pass http://{{ (index .Values.backend.paths 0).serviceName }}:{{ (index .Values.backend.paths 0).port }};
+        }
+
+        location /health {
+            default_type text/plain;
+            return 200 'ok';
+        }
+
+        error_page 404 /index.html;
+    }

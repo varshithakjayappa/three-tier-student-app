@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.names.deployment }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "frontend-app.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "frontend-app.selectorLabels" . | nindent 6 }}
+    strategy:
+      type: RollingUpdate
+      rollingUpdate:
+        maxSurge: 1
+        maxUnavailable: 25%
+  template:
+    metadata:
+      labels:
+        {{- include "frontend-app.labels" . | nindent 8 }}
+    spec:
+      imagePullSecrets: 
+      - name: {{ .Values.imagePullSecrets.existingSecret }}  
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+          - containerPort: {{ .Values.service.port }}
+          env:
+          - name: REACT_APP_API_BASE_URL
+            value: http://{{ (index .Values.backend.paths 0).serviceName }}:{{ (index .Values.backend.paths 0).port }}
+          volumeMounts:
+            - name: {{ .Values.names.volumeName }}
+              mountPath: /etc/nginx/conf.d/default.conf
+              subPath: default.conf
+              readOnly: true
+          {{- with .Values.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      volumes:
+      - name: {{ .Values.names.volumeName }}
+        configMap:
+          name: {{ .Values.names.configMap }}
+          
+      
