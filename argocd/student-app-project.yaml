@@ -11,4 +11,6 @@ spec:
   destinations:
     - namespace: three-tier
       server: https://kubernetes.default.svc
+  namespaces:
+    - argocd
 
