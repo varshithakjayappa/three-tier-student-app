@@ -1,0 +1,14 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: student-app
+  namespace: argocd
+spec:
+  description: Student Three-Tier App project
+  sourceRepos:
+    #- '*'  
+    -  https://github.com/varshithakjayappa/three-tier-student-app.git
+  destinations:
+    - namespace: three-tier
+      server: https://kubernetes.default.svc
+

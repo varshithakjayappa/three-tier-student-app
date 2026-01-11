@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: mysql
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  project: student-app
+  source:
+    repoURL: https://github.com/varshithakjayappa/three-tier-student-app.git
+    targetRevision: helm
+    path: helm/mysql-db
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: three-tier
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
