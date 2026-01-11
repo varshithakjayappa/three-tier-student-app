@@ -4,11 +4,11 @@ metadata:
   name: root-app
   namespace: argocd
 spec:
-  project: student-app
+  project: default
   source:
     repoURL: https://github.com/varshithakjayappa/three-tier-student-app.git
     targetRevision: helm
-    path: argocd-apps
+    path: argocd/argocd-apps
     directory:
       recurse: true
   destination:
