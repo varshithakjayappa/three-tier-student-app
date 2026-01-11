@@ -5,7 +5,7 @@ names:
   deployment: backend-deployment
   service: backend
   configMap: backend-config
-  secret: mysql-secret
+  secret: backend-secret
 # This will set the replicaset count more information can be found here: https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/
 
 replicaCount: 1
