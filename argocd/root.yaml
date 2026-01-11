@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: https://github.com/varshithakjayappa/three-tier-student-app.git
     targetRevision: helm
-    path: argocd/argocd-apps
+    path: argocd/apps
     directory:
       recurse: true
   destination:
