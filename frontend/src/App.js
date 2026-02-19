@@ -21,7 +21,9 @@ function App() {
           <Container maxW="6xl" py={6} minH="calc(100vh - 112px)">
             <Routes />
           </Container>
-        //  <Footer />
+        {/*
+  <Footer />
+  */}
           <ToastProvider />
         </Router>
       </ErrorBoundary>
