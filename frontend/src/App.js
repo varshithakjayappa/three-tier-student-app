@@ -6,7 +6,7 @@ import { ChakraProvider, Container } from "@chakra-ui/react";
 import { ColorModeScript } from "@chakra-ui/react";
 import { theme } from "./theme";
 import Navbar from "./components/Navbar";
-import Footer from "./components/Footer";
+// import Footer from "./components/Footer";
 import ErrorBoundary from "./components/ErrorBoundary";
 import ToastProvider from "./components/ToastProvider";
 import { BrowserRouter as Router } from "react-router-dom"; // ✅ Correct import
