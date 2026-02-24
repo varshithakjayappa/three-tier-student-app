@@ -1,0 +1,75 @@
+pipeline {
+    agent any
+
+    environment {
+        SCANNER_HOME    = tool 'sonar-scanner'
+        DOCKER_IMAGE    = 'student-app-backend-image'
+        APP_VERSION     = '0.1.0'
+        DOCKER_TAG      = "${APP_VERSION}-${env.BUILD_NUMBER}"
+        DOCKER_USERNAME = 'varshithakj'
+        GIT_REPO_NAME   = 'three-tier-student-app'
+        GIT_USER_NAME   = 'varshithakjayappa'
+    }
+
+    stages {
+
+        stage('Checkout Code') {
+            steps {
+                git branch: 'helm',
+                    url: 'https://github.com/varshithakjayappa/three-tier-student-app.git'
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                dir('backend') {
+                    withSonarQubeEnv('Sonarqube') {
+                        sh "${SCANNER_HOME}/bin/sonar-scanner"
+                    }
+                }
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                dir('backend') {
+                    sh "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
+                }
+            }
+        }
+
+        stage('Push to Docker Hub') {
+            steps {
+                withDockerRegistry([credentialsId: 'docker-cred', url: '']) {
+
+                    sh "docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_USERNAME}/${DOCKER_IMAGE}:${DOCKER_TAG}"
+                    sh "docker push ${DOCKER_USERNAME}/${DOCKER_IMAGE}:${DOCKER_TAG}"
+                }
+            }
+        }
+
+        stage('Update Helm Values & Deploy') {
+            steps {
+
+                dir('helm/backend-app') {
+
+                    withCredentials([string(credentialsId: 'github_token', variable: 'GITHUB_TOKEN')]) {
+
+                        sh """
+                        git config user.email "varshitha.k.jayappa@gmail.com"
+                        git config user.name "varshithakjayappa"
+
+                        sed -i "s|repository:.*|repository: ${DOCKER_USERNAME}/${DOCKER_IMAGE}|" values.yaml
+                        sed -i "s|tag:.*|tag: \\"${DOCKER_TAG}\\"|" values.yaml
+
+                        git add values.yaml
+                        git commit -m "Update backend image to version ${DOCKER_TAG}" || true
+
+                        git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:helm
+                        """
+                    }
+                }
+            }
+        }
+    }
+}
